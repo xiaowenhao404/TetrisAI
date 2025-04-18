@@ -9,53 +9,57 @@ function Piece(cells){
 Piece.fromIndex = function(index){
     var piece;
     switch (index){
-        case 0:// O
+        case 0: // One 单个方块 红色
             piece = new Piece([
-                [0x0000AA, 0x0000AA],
-                [0x0000AA, 0x0000AA]
+                [0xFF0000, 0x000000],
+                [0x000000, 0x000000]
             ]);
             break;
-        case 1: // J
+        case 1: // Two 短条方块 橙色
             piece = new Piece([
-                [0xC0C0C0, 0x000000, 0x000000],
-                [0xC0C0C0, 0xC0C0C0, 0xC0C0C0],
-                [0x000000, 0x000000, 0x000000]
+                [0xFFA500, 0xFFA500],
+                [0x000000, 0x000000]
             ]);
             break;
-        case 2: // L
+        case 2: // Corner 三角方块 黄色
             piece = new Piece([
-                [0x000000, 0x000000, 0xAA00AA],
-                [0xAA00AA, 0xAA00AA, 0xAA00AA],
-                [0x000000, 0x000000, 0x000000]
+                [0x000000, 0xFFFF00],
+                [0xFFFF00, 0xFFFF00]
             ]);
             break;
-        case 3: // Z
+        case 3: // Square 正宗方块 绿色
             piece = new Piece([
-                [0x00AAAA, 0x00AAAA, 0x000000],
-                [0x000000, 0x00AAAA, 0x00AAAA],
-                [0x000000, 0x000000, 0x000000]
+                [0x00FF00, 0x00FF00],
+                [0x00FF00, 0x00FF00]
             ]);
             break;
-        case 4: // S
+        case 4: // LeftL 左L方块 蓝青色
             piece = new Piece([
-                [0x000000, 0x00AA00, 0x00AA00],
-                [0x00AA00, 0x00AA00, 0x000000],
-                [0x000000, 0x000000, 0x000000]
+                [0x00FFFF, 0x000000, 0x000000],
+                [0x00FFFF, 0x000000, 0x000000],
+                [0x00FFFF, 0x00FFFF, 0x000000]
             ]);
             break;
-        case 5: // T
+        case 5: // RightL 右L方块 蓝色
             piece = new Piece([
-                [0x000000, 0xAA5500, 0x000000],
-                [0xAA5500, 0xAA5500, 0xAA5500],
-                [0x000000, 0x000000, 0x000000]
+                [0x000000, 0x0000FF, 0x000000],
+                [0x000000, 0x0000FF, 0x000000],
+                [0x0000FF, 0x0000FF, 0x000000]
             ]);
             break;
-        case 6: // I
+        case 6: // Column 长条方块 品红色
             piece = new Piece([
-                [0x000000, 0x000000, 0x000000, 0x000000],
-                [0xAA0000, 0xAA0000, 0xAA0000, 0xAA0000],
-                [0x000000, 0x000000, 0x000000, 0x000000],
-                [0x000000, 0x000000, 0x000000, 0x000000]
+                [0xFF00FF, 0x000000, 0x000000, 0x000000],
+                [0xFF00FF, 0x000000, 0x000000, 0x000000],
+                [0xFF00FF, 0x000000, 0x000000, 0x000000],
+                [0xFF00FF, 0x000000, 0x000000, 0x000000]
+            ]);
+            break;
+        case 7: // Cross 十字方块 紫色
+            piece = new Piece([
+                [0x000000, 0x800080, 0x000000],
+                [0x800080, 0x800080, 0x800080],
+                [0x000000, 0x800080, 0x000000]
             ]);
             break;
 
