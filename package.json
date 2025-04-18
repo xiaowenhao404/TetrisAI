@@ -1,0 +1,12 @@
+{
+  "name": "tetrisai-github",
+  "version": "1.0.0",
+  "description": "AI 生成过程     ↓ 构造函数 `AI(weights)`     ├── 保存权重：heightWeight, linesWeight, holesWeight, bumpinessWeight     └── 用于后续决策评分",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

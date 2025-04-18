@@ -62,13 +62,13 @@ Grid.prototype.exceeded = function(){
     return !this.isEmptyRow(0) || !this.isEmptyRow(1);
 };
 
-Grid.prototype.height = function(){
+Grid.prototype.height = function(){//计算非空行数 表示方块堆叠的总高度
     var r = 0;
     for(; r < this.rows && this.isEmptyRow(r); r++);
     return this.rows - r;
 };
 
-Grid.prototype.lines = function(){
+Grid.prototype.lines = function(){//计算当前网格中已经被填满的行数
     var count = 0;
     for(var r = 0; r < this.rows; r++){
         if (this.isLine(r)){
@@ -78,7 +78,7 @@ Grid.prototype.lines = function(){
     return count;
 };
 
-Grid.prototype.holes = function(){
+Grid.prototype.holes = function(){//计算所有空洞
     var count = 0;
     for(var c = 0; c < this.columns; c++){
         var block = false;
@@ -162,3 +162,5 @@ Grid.prototype.valid = function(piece){
     }
     return true;
 };
+
+module.exports = Grid;

@@ -61,11 +61,11 @@ Piece.fromIndex = function(index){
 
     }
     piece.row = 0;
-    piece.column = Math.floor((10 - piece.dimension) / 2); // Centralize
+    piece.column = Math.floor((10 - piece.dimension) / 2); // Centralize·初始列位置
     return piece;
 };
 
-Piece.prototype.clone = function(){
+Piece.prototype.clone = function(){//克隆当前方块
     var _cells = new Array(this.dimension);
     for (var r = 0; r < this.dimension; r++) {
         _cells[r] = new Array(this.dimension);
@@ -80,7 +80,7 @@ Piece.prototype.clone = function(){
     return piece;
 };
 
-Piece.prototype.canMoveLeft = function(grid){
+Piece.prototype.canMoveLeft = function(grid){//判断方块是否能向左移动
     for(var r = 0; r < this.cells.length; r++){
         for(var c = 0; c < this.cells[r].length; c++){
             var _r = this.row + r;
@@ -95,7 +95,7 @@ Piece.prototype.canMoveLeft = function(grid){
     return true;
 };
 
-Piece.prototype.canMoveRight = function(grid){
+Piece.prototype.canMoveRight = function(grid){//判断方块是否能向右移动
     for(var r = 0; r < this.cells.length; r++){
         for(var c = 0; c < this.cells[r].length; c++){
             var _r = this.row + r;
@@ -111,7 +111,7 @@ Piece.prototype.canMoveRight = function(grid){
 };
 
 
-Piece.prototype.canMoveDown = function(grid){
+Piece.prototype.canMoveDown = function(grid){//判断方块是否能向下移动
     for(var r = 0; r < this.cells.length; r++){
         for(var c = 0; c < this.cells[r].length; c++){
             var _r = this.row + r + 1;
@@ -126,7 +126,7 @@ Piece.prototype.canMoveDown = function(grid){
     return true;
 };
 
-Piece.prototype.moveLeft = function(grid){
+Piece.prototype.moveLeft = function(grid){//向左移动方块
     if(!this.canMoveLeft(grid)){
         return false;
     }
@@ -134,7 +134,7 @@ Piece.prototype.moveLeft = function(grid){
     return true;
 };
 
-Piece.prototype.moveRight = function(grid){
+Piece.prototype.moveRight = function(grid){//向右移动方块
     if(!this.canMoveRight(grid)){
         return false;
     }
@@ -142,7 +142,7 @@ Piece.prototype.moveRight = function(grid){
     return true;
 };
 
-Piece.prototype.moveDown = function(grid){
+Piece.prototype.moveDown = function(grid){//向下移动方块
     if(!this.canMoveDown(grid)){
         return false;
     }
@@ -150,7 +150,7 @@ Piece.prototype.moveDown = function(grid){
     return true;
 };
 
-Piece.prototype.rotateCells = function(){
+Piece.prototype.rotateCells = function(){//旋转方块
       var _cells = new Array(this.dimension);
       for (var r = 0; r < this.dimension; r++) {
           _cells[r] = new Array(this.dimension);
@@ -198,14 +198,14 @@ Piece.prototype.rotateCells = function(){
       this.cells = _cells;
 };
 
-Piece.prototype.computeRotateOffset = function(grid){
+Piece.prototype.computeRotateOffset = function(grid){//计算旋转后的位置偏移
     var _piece = this.clone();
     _piece.rotateCells();
     if (grid.valid(_piece)) {
         return { rowOffset: _piece.row - this.row, columnOffset: _piece.column - this.column };
     }
 
-    // Kicking
+    // Kicking·墙踢
     var initialRow = _piece.row;
     var initialCol = _piece.column;
 
@@ -244,7 +244,7 @@ Piece.prototype.computeRotateOffset = function(grid){
     return null;
 };
 
-Piece.prototype.rotate = function(grid){
+Piece.prototype.rotate = function(grid){//执行旋转
     var offset = this.computeRotateOffset(grid);
     if (offset != null){
         this.rotateCells(grid);
@@ -252,3 +252,5 @@ Piece.prototype.rotate = function(grid){
         this.column += offset.columnOffset;
     }
 };
+
+module.exports = Piece;
