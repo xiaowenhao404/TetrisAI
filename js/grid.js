@@ -59,7 +59,7 @@ Grid.prototype.isEmptyRow = function(row){
 };
 
 Grid.prototype.exceeded = function(){
-    return !this.isEmptyRow(0) || !this.isEmptyRow(1);
+    return !this.isEmptyRow(0) || !this.isEmptyRow(1) || !this.isEmptyRow(2) || !this.isEmptyRow(3);
 };
 
 Grid.prototype.height = function(){//计算非空行数 表示方块堆叠的总高度

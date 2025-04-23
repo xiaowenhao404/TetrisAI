@@ -8,7 +8,7 @@ function GameManager(){
     var nextContext = nextCanvas.getContext('2d');//这是为“下一块方块”的预览画布准备画图环境
     document.addEventListener('keydown', onKeyDown);//监听整个网页的键盘事件
 
-    var grid = new Grid(22, 10);//显示为20行 第0、1行用于检测超出失败
+    var grid = new Grid(22, 10);//显示为18行 第0、1、2、3行用于检测超出失败
     var rpg = new RandomPieceGenerator(false);//随机方块生成器(我增加了是否启用随机参数)
     var ai = new AI({//调用ai.js中的AI传参
         heightWeight: 0.510066,
