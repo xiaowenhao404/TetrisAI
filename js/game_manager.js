@@ -1,4 +1,4 @@
-function GameManager(){
+function GameManager(sequence, level = 1){
     var gridCanvas = document.getElementById('grid-canvas');//获取 HTML 页面中用来画主游戏区的 <canvas> 元素
     var nextCanvas = document.getElementById('next-canvas');//获取右边用于显示“下一个方块”的画布
     var scoreContainer = document.getElementById("score-container");//获取右侧“当前得分”显示区域的 DOM 元素，用于更新分数文本
@@ -9,7 +9,7 @@ function GameManager(){
     document.addEventListener('keydown', onKeyDown);//监听整个网页的键盘事件
 
     var grid = new Grid(22, 10);//显示为18行 第0、1、2、3行用于检测超出失败
-    var rpg = new RandomPieceGenerator(false);//随机方块生成器(我增加了是否启用随机参数)
+    var rpg = new RandomPieceGenerator(sequence);//随机方块生成器(我增加了是否启用随机参数)
     var ai = new AI({//调用ai.js中的AI传参
         heightWeight: 0.510066,
         linesWeight: 0.760666,
@@ -124,7 +124,30 @@ function GameManager(){
     }
 
     // Process start of turn
+    this.level = level;
     function startTurn(){
+        switch(this.level) {
+            case 1:
+                // 正常生成方块
+                break;
+            case 2:
+                this.addRandomHeight(2);  // 在 level 2，添加随机层
+                break;
+            case 3:
+                this.addRandomHeightEveryXSteps(10);  // 每10步叠加一层
+                break;
+            case 4:
+                this.randomControlPiece();  // 随机控制方块的下落位置
+                break;
+            case 5:
+                this.addRandomHeight(2);
+                this.addRandomHeightEveryXSteps(10);
+                this.randomControlPiece();
+                break;
+            default:
+                // 正常生成方块
+                break;
+        }
         // Shift working pieces·更新方块队列
         for(var i = 0; i < workingPieces.length - 1; i++){
             workingPieces[i] = workingPieces[i + 1];
@@ -152,6 +175,57 @@ function GameManager(){
             gravityTimer.resetForward(500);//重置重力下落定时器
         }
     }
+
+    // 随机叠加层（level 2）
+    this.addRandomHeight = function(randomHeight) {
+        for (let i = 0; i < randomHeight; i++) {
+            let row = this.grid.rows - 1 - i;  // 从底部往上开始
+            for (let col = 0; col < this.grid.columns; col++) {
+                if (Math.random() < 0.7) {  // 70%的概率生成方块
+                    // 将生成的方块设置为灰色或特定颜色来表示随机生成
+                    this.grid.cells[row][col] = 0x808080; 
+                }
+            }
+        }
+    };
+
+    // 每 x 步叠加随机层（level 3）
+    this.addRandomHeightEveryXSteps = function(stepInterval) {
+        if (this.steps % stepInterval === 0) {  // 每过 `x` 步执行一次
+            let row = this.grid.rows - 1;  // 底层
+    
+            // 复制上一行的状态到当前行（继承之前的方块）
+            for (let col = 0; col < this.grid.columns; col++) {
+                this.grid.cells[row][col] = this.grid.cells[row - 1][col];
+            }
+    
+            // 然后遍历当前行的每个格子，决定是否生成方块
+            for (let col = 0; col < this.grid.columns; col++) {
+                if (Math.random() < 0.7) {  // 70%的概率生成方块
+                    this.grid.cells[row][col] = 0x808080;
+                }
+            }
+        }
+    };
+
+    // 随机控制下一个方块的下落位置（level 4）
+    this.randomControlPiece = function() {
+        if (Math.random() < 0.2) {  // 随机间隔来控制方块下落位置
+            let randomColumn = Math.floor(Math.random() * this.grid.columns);  // 随机选择一个列
+    
+            // 判断当前位置是否能放下方块（没有越界并且没有与已有方块重叠）
+            // 使用 grid.valid() 来判断该列是否有效
+            let pieceWithRandomColumn = this.workingPiece.clone();
+            pieceWithRandomColumn.column = randomColumn;
+    
+            // 如果不能放置方块，重新随机选择列
+            if (!this.grid.valid(pieceWithRandomColumn)) {
+                this.randomControlPiece();  // 递归重新选择列
+            } else {
+                this.workingPiece.column = randomColumn;  // 如果可以放下方块，则设置新的列位置
+            }
+        }
+    };
 
     // Process end of turn
     function endTurn(){

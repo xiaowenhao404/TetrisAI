@@ -1,8 +1,8 @@
 const Piece = require('./piece.js');
 
-function RandomPieceGenerator(isRandom = false){
+function RandomPieceGenerator(isRandom = false,sequence){//sequence手动输入序列
     this.isRandom = isRandom;//通过参数决定是否启用真随机
-    this.bag = [0, 1, 2, 3, 4, 5, 6, 7];//代表方块类型
+    this.bag = sequence || [0, 1, 2, 3, 4, 5, 6, 7];//代表方块类型
     if(!this.isRandom){
         this.shuffleBag();//如果是伪随机 采用原来的打乱顺序模式
     }
