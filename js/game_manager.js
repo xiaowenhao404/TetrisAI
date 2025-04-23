@@ -24,6 +24,128 @@ function GameManager(sequence, level = 1){
     var gravityTimer = new Timer(onGravityTimerTick, 500);//重力定时器 设定下落速度1格/500ms
     var score = 0;
 
+    // Process start of turn
+    const startTurn = () =>  {
+        skipflag=0;
+        // Shift working pieces·更新方块队列
+        for (var i = 0; i < workingPieces.length - 1; i++) {
+            workingPieces[i] = workingPieces[i + 1];
+        }
+        workingPieces[workingPieces.length - 1] = rpg.nextPiece();
+        workingPiece = workingPieces[0];
+
+        switch (level) {
+            case 1:
+                // 正常生成方块
+                break;
+            case 2:
+                if(!isRandomHeightAdded)
+                this.addRandomHeight(5);  // 在 level 2，添加随机层
+                break;
+            case 3:
+                this.addRandomHeightEveryXSteps(20);  // 每若干步叠加一层
+                break;
+            case 4:
+                this.randomControlPiece(15);  // 随机控制方块的下落位置
+                break;
+            case 5:
+                if(!isRandomHeightAdded)
+                this.addRandomHeight(5);
+                this.addRandomHeightEveryXSteps(20);
+                this.randomControlPiece(15);
+                break;
+            default:
+                // 正常生成方块
+                break;
+        }
+
+        // Refresh Graphics
+        redrawGridCanvas();
+        redrawNextCanvas();
+
+        if (isAiActive) {//如果启用AI模式
+            isKeyEnabled = false;//禁止键盘操作
+            
+            if(!skipflag)
+            workingPiece = ai.best(grid, workingPieces);//让AI决策
+            else{
+                // 将方块的颜色全部设置为黑色
+            for (let r = 0; r < workingPiece.cells.length; r++) {
+                for (let c = 0; c < workingPiece.cells[r].length; c++) {
+                    if (workingPiece.cells[r][c] !== 0) {
+                        workingPiece.cells[r][c] = 0x444444; // 设置为黑色
+                    }
+                }
+            }
+            }
+            startWorkingPieceDropAnimation(function () {
+                while (workingPiece.moveDown(grid)); // Drop working piece
+                if (!endTurn()) {
+                    alert('Game Over!');
+                    return;
+                }
+                startTurn();
+            })
+        } else {
+            isKeyEnabled = true;//开启键盘控制
+            gravityTimer.resetForward(500);//重置重力下落定时器
+        }
+        step++;
+    }
+
+    // 随机叠加层（level 2）
+    this.addRandomHeight = function (randomHeight) {
+        for (let i = 0; i < randomHeight; i++) {
+            let row = grid.rows - 1 - i;  // 从底部往上开始
+            for (let col = 0; col < grid.columns; col++) {
+                if (Math.random() < 0.5) {  // 50%的概率生成方块
+                    // 将生成的方块设置为灰色或特定颜色来表示随机生成
+                    grid.cells[row][col] = 0x808080;
+                }
+            }
+        }
+        isRandomHeightAdded = true; // 设置标记，表示已执行过
+    };
+
+    // 每 x 步叠加随机层（level 3）
+    this.addRandomHeightEveryXSteps = function (stepInterval) {
+        if (step % stepInterval === 0) {  // 每过 `x` 步执行一次
+            // 复制上一行的状态到当前行（继承之前的方块）
+            for (let i = 1; i < grid.rows; i++){
+                for (let j = 0; j < grid.columns; j++) {
+                    grid.cells[i-1][j] = grid.cells[i][j];
+                }
+            }
+            // 然后遍历当前行的每个格子，决定是否生成方块
+            for (let j = 0; j < grid.columns; j++) {
+                if (Math.random() < 0.5) {  // 50%的概率生成方块
+                    grid.cells[21][j] = 0x808080;
+                }
+                else grid.cells[21][j] = 0x000000;
+            }
+        }
+    };
+
+    // 随机控制下一个方块的下落位置（level 4）
+    this.randomControlPiece = function (stepInterval) {
+        if (step!=0 && step % stepInterval === 0) {  // 随机间隔来控制方块下落位置
+            skipflag=1;
+            let randomColumn = Math.floor(Math.random() * grid.columns);  // 随机选择一个列
+
+            // 判断当前位置是否能放下方块（没有越界并且没有与已有方块重叠）
+            // 使用 grid.valid() 来判断该列是否有效
+            pieceWithRandomColumn = workingPiece.clone();
+            pieceWithRandomColumn.column = randomColumn;
+            
+            // 如果不能放置方块，重新随机选择列
+            if (!grid.valid(pieceWithRandomColumn)) {
+                this.randomControlPiece(stepInterval);  // 递归重新选择列
+            } else {
+                workingPiece.column = pieceWithRandomColumn.column;  // 如果可以放下方块，则设置新的列位置
+            }
+        }
+    };
+
     // Graphics·图像
     function intToRGBHexString(v){
         return 'rgb(' + ((v >> 16) & 0xFF) + ',' + ((v >> 8) & 0xFF) + ',' + (v & 0xFF) + ')';
@@ -83,7 +205,7 @@ function GameManager(sequence, level = 1){
 
         nextContext.restore();
     }
-
+    
     function updateScoreContainer(){//把当前游戏得分 score 显示到网页右侧的得分区域
         scoreContainer.innerHTML = score.toString();
         //scoreContainer——HTML元素 innerHTML——修改内容 score.toString()数字改成字符串
@@ -122,110 +244,6 @@ function GameManager(sequence, level = 1){
         workingPieceDropAnimationStopwatch.stop();
         workingPieceDropAnimationStopwatch = null;
     }
-
-    // Process start of turn
-    this.level = level;
-    function startTurn(){
-        switch(this.level) {
-            case 1:
-                // 正常生成方块
-                break;
-            case 2:
-                this.addRandomHeight(2);  // 在 level 2，添加随机层
-                break;
-            case 3:
-                this.addRandomHeightEveryXSteps(10);  // 每10步叠加一层
-                break;
-            case 4:
-                this.randomControlPiece();  // 随机控制方块的下落位置
-                break;
-            case 5:
-                this.addRandomHeight(2);
-                this.addRandomHeightEveryXSteps(10);
-                this.randomControlPiece();
-                break;
-            default:
-                // 正常生成方块
-                break;
-        }
-        // Shift working pieces·更新方块队列
-        for(var i = 0; i < workingPieces.length - 1; i++){
-            workingPieces[i] = workingPieces[i + 1];
-        }
-        workingPieces[workingPieces.length - 1] = rpg.nextPiece();
-        workingPiece = workingPieces[0];
-
-        // Refresh Graphics
-        redrawGridCanvas();
-        redrawNextCanvas();
-
-        if(isAiActive){//如果启用AI模式
-            isKeyEnabled = false;//禁止键盘操作
-            workingPiece = ai.best(grid, workingPieces);//让AI决策
-            startWorkingPieceDropAnimation(function(){
-                while(workingPiece.moveDown(grid)); // Drop working piece
-                if(!endTurn()){
-                    alert('Game Over!');
-                    return;
-                }
-                startTurn();
-            })
-        }else{
-            isKeyEnabled = true;//开启键盘控制
-            gravityTimer.resetForward(500);//重置重力下落定时器
-        }
-    }
-
-    // 随机叠加层（level 2）
-    this.addRandomHeight = function(randomHeight) {
-        for (let i = 0; i < randomHeight; i++) {
-            let row = this.grid.rows - 1 - i;  // 从底部往上开始
-            for (let col = 0; col < this.grid.columns; col++) {
-                if (Math.random() < 0.7) {  // 70%的概率生成方块
-                    // 将生成的方块设置为灰色或特定颜色来表示随机生成
-                    this.grid.cells[row][col] = 0x808080; 
-                }
-            }
-        }
-    };
-
-    // 每 x 步叠加随机层（level 3）
-    this.addRandomHeightEveryXSteps = function(stepInterval) {
-        if (this.steps % stepInterval === 0) {  // 每过 `x` 步执行一次
-            let row = this.grid.rows - 1;  // 底层
-    
-            // 复制上一行的状态到当前行（继承之前的方块）
-            for (let col = 0; col < this.grid.columns; col++) {
-                this.grid.cells[row][col] = this.grid.cells[row - 1][col];
-            }
-    
-            // 然后遍历当前行的每个格子，决定是否生成方块
-            for (let col = 0; col < this.grid.columns; col++) {
-                if (Math.random() < 0.7) {  // 70%的概率生成方块
-                    this.grid.cells[row][col] = 0x808080;
-                }
-            }
-        }
-    };
-
-    // 随机控制下一个方块的下落位置（level 4）
-    this.randomControlPiece = function() {
-        if (Math.random() < 0.2) {  // 随机间隔来控制方块下落位置
-            let randomColumn = Math.floor(Math.random() * this.grid.columns);  // 随机选择一个列
-    
-            // 判断当前位置是否能放下方块（没有越界并且没有与已有方块重叠）
-            // 使用 grid.valid() 来判断该列是否有效
-            let pieceWithRandomColumn = this.workingPiece.clone();
-            pieceWithRandomColumn.column = randomColumn;
-    
-            // 如果不能放置方块，重新随机选择列
-            if (!this.grid.valid(pieceWithRandomColumn)) {
-                this.randomControlPiece();  // 递归重新选择列
-            } else {
-                this.workingPiece.column = randomColumn;  // 如果可以放下方块，则设置新的列位置
-            }
-        }
-    };
 
     // Process end of turn
     function endTurn(){
@@ -323,7 +341,7 @@ function GameManager(sequence, level = 1){
                     alert('Game Over!');
                     return;
                 }
-                startTurn();
+                startTurn(level);
             });
         }
     }
@@ -337,8 +355,10 @@ function GameManager(sequence, level = 1){
         workingPiece = null;
         score = 0;
         isKeyEnabled = true;
+        isRandomHeightAdded = false;
+        step=0;
         updateScoreContainer();
-        startTurn();
+        startTurn(level);
     }
 
     aiButton.style.backgroundColor = "#e9e9ff";
