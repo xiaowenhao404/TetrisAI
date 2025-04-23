@@ -21,11 +21,13 @@ Grid.prototype.clone = function(){
     return _grid;
 };
 
-Grid.prototype.clearLines = function(){
+Grid.prototype.clearLines = function() {
     var distance = 0;
     var row = new Array(this.columns);
+    var linesCleared = 0;  // 记录消除的行数
     for(var r = this.rows - 1; r >= 0; r--){
         if (this.isLine(r)){
+            linesCleared++;  // 统计已消除的行数
             distance++;
             for(var c = 0; c < this.columns; c++){
                 this.cells[r][c] = 0;
@@ -37,8 +39,25 @@ Grid.prototype.clearLines = function(){
             }
         }
     }
-    return distance;
+    // 根据消除的行数计算得分
+    let score = 0;
+    switch (linesCleared) {
+        case 1:
+            score = 1;
+            break;
+        case 2:
+            score = 3;
+            break;
+        case 3:
+            score = 6;
+            break;
+        case 4:
+            score = 10;
+            break;
+    }
+    return score;  // 返回得分
 };
+
 
 Grid.prototype.isLine = function(row){
     for(var c = 0; c < this.columns; c++){
