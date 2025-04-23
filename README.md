@@ -1,3 +1,11 @@
+# 程序使用说明
+
+1 使用TetrisAI-Web.zip包解压缩后右击index.html选择OpenwithLiveServer实现查看程序网页
+程序难度在index.html中调整
+
+2 用cmd打开项目文件夹 cd "绝对路径" 后输入命令node index.js（需要安装Node）
+程序难度和相关参数在index.js中调整
+
 # 关于GA遗传算法的参数
 
 可以直接修改index.js里的参数来控制算法迭代速度
