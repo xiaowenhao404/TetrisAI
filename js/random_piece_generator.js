@@ -5,22 +5,22 @@ function RandomPieceGenerator(isRandom = false,sequence = null){//sequence手动
     this.bag = sequence || [0, 1, 2, 3, 4, 5, 6, 7];//代表方块类型
     if(!this.isRandom){
         this.shuffleBag();//如果是伪随机 采用原来的打乱顺序模式
+        this.index = -1;
     }
-    this.index = -1;
 };
 
 RandomPieceGenerator.prototype.nextPiece = function(){
-    this.index++;
-    if (this.index >= this.bag.length) {
-        if (this.isRandom) {
-            //真随机 使用完全随机方式重新生成方块
-            this.bag = this.generateRandomBag(); //重置索引
-        } else {
+    if (this.isRandom) {
+        //真随机 使用完全随机方式重新生成方块
+        return Piece.fromIndex(this.bag[Math.floor(Math.random() * this.bag.length)]);
+    } else {
+        this.index++;
+        if (this.index >= this.bag.length) {
             this.shuffleBag();//如果是伪随机 重新打乱方块顺序
+            this.index = 0;//重置索引
         }
-        this.index = 0;//重置索引
+        return Piece.fromIndex(this.bag[this.index]);
     }
-    return Piece.fromIndex(this.bag[this.index]);
 };
 
 RandomPieceGenerator.prototype.shuffleBag = function() {
@@ -41,18 +41,6 @@ RandomPieceGenerator.prototype.shuffleBag = function() {
         this.bag[currentIndex] = this.bag[randomIndex];
         this.bag[randomIndex] = temporaryValue;
     }
-};
-
-// 完全随机生成0到7的数字序列
-RandomPieceGenerator.prototype.generateRandomBag = function() {
-    var randomBag = [];
-    while (randomBag.length < 8) {
-        var randomNum = Math.floor(Math.random() * 8);
-        if (!randomBag.includes(randomNum)) {
-            randomBag.push(randomNum);
-        }
-    }
-    return randomBag;
 };
 
 module.exports = RandomPieceGenerator;
