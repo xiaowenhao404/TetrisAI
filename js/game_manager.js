@@ -52,7 +52,7 @@ function GameManager(sequence, level = 1){
                 if(!isRandomHeightAdded)
                 this.addRandomHeight(5);
                 this.addRandomHeightEveryXSteps(20);
-                this.randomControlPiece(15);
+                this.randomControlPiece(20);
                 break;
             default:
                 // 正常生成方块
